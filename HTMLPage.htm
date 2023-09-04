@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>地铁站点转换为GeoJSON</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <script>
+        $(document).ready(function () {
+            $.get("subway.json", function (res) {
+                var geojson = {
+                    type: "FeatureCollection",
+                    features: []
+                };
+
+                var stations = {};
+
+                res.forEach(function (line) {
+                    var kn = line.kn,
+                        ln = line.ln,
+                        cl = line.cl,
+                        ls = line.ls;
+
+                    line.st.forEach(function (s) {
+                        if (!stations[s.poiid]) {
+                            var coords = s.sl.split(',').map(function (coord) { return parseFloat(coord); });
+
+                            var properties = {
+                                name: s.n,
+                                lineName: ln,
+                                colorLine: cl
+                            };
+
+                            var feature = {
+                                type: "Feature",
+                                geometry: {
+                                    type: "Point",
+                                    coordinates: coords
+                                },
+                                properties: properties
+                            };
+
+                            geojson.features.push(feature);
+                            stations[s.poiid] = true;
+                        }
+                    });
+                });
+
+                console.log(geojson);
+            });
+        });
+    </script>
+
+</body>
+</html>
